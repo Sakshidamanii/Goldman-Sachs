@@ -1,0 +1,44 @@
+class Solution {
+    // Idea:
+    // if A + rev(B) = rev(A) + B:
+    // it means that (A-rev(A)) = (B-rev(B)).
+    // So we make a HashMap and store all the difference and its counts
+    // Each count of same difference means that we have a new nice pair
+    
+    // Helper function for calculating rev
+    public int rev(int num){
+        int result = 0;
+        while (num != 0) {
+            // for example, rev(123) = 321
+            // 1st iteration: result = 0 + 3 = 3
+            // 2nd iteration: result = 30 + 2 = 32
+            // 3rd iteration: result = 320 + 1 = 321
+            result = (result * 10) + (num % 10);
+            num /= 10;
+        }
+        return result;
+    }
+    
+    public int countNicePairs(int[] nums) {
+        long modulo = (long)Math.pow(10, 9) + 7L;
+        long result = 0;
+        Map<Integer, Integer> mapping = new HashMap<>();
+        
+        // Step 1: Calculate all (number - rev(number)) and put them into mapping
+        for (int curr : nums) {
+            int diff = curr - rev(curr);
+            mapping.put(diff, mapping.getOrDefault(diff, 0)+1);
+        }
+        
+        // Step 2: Count how many nice pairs
+        // If we have count = 2, we have (A-rev(A)) = (B-rev(B)) , so 1 nice pair
+        // If we have count = 3, we have (A-rev(A)) = (B-rev(B)) = (C-rev(C)), so (A,B) (B,C) (A,C) = 3 pairs
+        // If we have count = 4, we have (A,B) (A,C) (A,D) (B,C) (B,D) (C,D) = 6 pairs
+        // So we have count * (count-1) permutations, but since (A,B) and (B,A) are treated as 1 pair, we divided by 2.
+        for (Integer key : mapping.keySet()) {
+            int count = mapping.get(key);
+            result += (count*(count-1L)) / 2L;
+        }
+        return (int) (result % modulo);
+    }
+}
